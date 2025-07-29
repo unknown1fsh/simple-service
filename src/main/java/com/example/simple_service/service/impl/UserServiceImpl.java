@@ -8,91 +8,69 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * UserServiceImpl, UserService arayüzündeki metodların uygulanmasını sağlar.
- * Uygulamanın iş mantığı burada konumlanır.
- */
+// Bu sınıf, UserService interface'ini implemente eder ve gerçek iş mantığını içerir.
+// @Service anotasyonu sayesinde Spring tarafından otomatik olarak bean olarak tanımlanır.
 @Service
 public class UserServiceImpl implements UserService {
 
+    // Veritabanı işlemleri için UserRepository kullanılır
     private final UserRepository userRepository;
 
-    /**
-     * Constructor injection: Test edilebilirlik ve sağlamlık açısından alan enjeksiyonuna tercih edilir.
-     *
-     * @param userRepository Kullanıcı veritabanı işlemlerinden sorumlu Repository
-     */
+    // Constructor-based dependency injection (tavsiye edilen yöntem)
     public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    // Yeni kullanıcıyı veritabanına kaydeder
     @Override
     public User saveUser(User user) {
-        // İsteğe bağlı: email veya diğer alanlar üzerinde ek validasyonlar yapılabilir.
         return userRepository.save(user);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    // Tüm kullanıcıları veritabanından getirir
     @Override
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Bulunamaması durumunda null döndürmek yerine bir "NotFoundException"
-     * fırlatmak veya {@link Optional} ile yönetmek genellikle daha temiz bir yaklaşımdır.
-     */
+    // ID'ye göre kullanıcıyı getirir; yoksa null döner
     @Override
     public User getUserById(Long id) {
         Optional<User> user = userRepository.findById(id);
-        return user.orElse(null);
+        return user.orElse(null); // Eğer kullanıcı bulunamazsa null döner
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Mevcut kaydı güncellemeden önce ek validasyonlar veya
-     * yetkilendirme kontrolleri yapabilirsiniz.
-     */
+    // Mevcut bir kullanıcıyı günceller (adı ve email bilgisi güncellenir)
     @Override
     public User updateUser(Long id, User user) {
-        User existingUser = getUserById(id);
+        User existingUser = getUserById(id); // Önce ID'ye göre kullanıcı alınır
         if (existingUser != null) {
+            // Kullanıcı varsa adı ve email bilgisi güncellenir
             existingUser.setName(user.getName());
             existingUser.setEmail(user.getEmail());
+            // Güncellenmiş kullanıcı veritabanına tekrar kaydedilir
             return userRepository.save(existingUser);
         }
-        return null; // Veya kendi özel mantığınızı veya özel bir Exception fırlatmayı tercih edebilirsiniz.
+        // Kullanıcı bulunamazsa null döner
+        return null;
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Silme işlemi başarıyla gerçekleşirse true, aksi halde false döndürür.
-     */
+    // Belirli bir kullanıcıyı siler, başarılıysa true döner
     @Override
     public boolean deleteUser(Long id) {
         Optional<User> userOptional = userRepository.findById(id);
         if (userOptional.isPresent()) {
+            // Kullanıcı bulunduysa silinir
             userRepository.delete(userOptional.get());
             return true;
         }
+        // Kullanıcı bulunamazsa silme işlemi gerçekleşmez
         return false;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    // Email'e göre kullanıcıyı getirir
     @Override
     public Optional<User> getUserByEmail(String email) {
-        // Gerekirse e-posta formatı için ek validasyon yapılabilir.
         return userRepository.findByEmail(email);
     }
 }

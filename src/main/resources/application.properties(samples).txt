@@ -1,0 +1,266 @@
+# 🧱 1. GENEL UYGULAMA AYARLARI (APPLICATION CONFIG)
+
+* `spring.application.name`
+  → Uygulama adını tanımlar. Actuator endpoint’lerinde ve loglarda kullanılır.
+  Örn: `spring.application.name=my-app`
+
+* `spring.profiles.active`
+  → Aktif Spring profilini belirtir (`dev`, `test`, `prod` gibi).
+  Örn: `spring.profiles.active=dev`
+
+* `spring.main.banner-mode`
+  → Uygulama başlatıldığında banner gösterilsin mi?
+  `off`, `console`, `log` değerlerini alır.
+  Örn: `spring.main.banner-mode=off`
+
+* `spring.main.allow-bean-definition-overriding`
+  → Aynı bean ismi birden fazla yerde tanımlanırsa override edilip edilmeyeceğini belirler.
+  `true` → override edilir.
+
+---
+
+# 🌐 2. SERVER (TOMCAT) AYARLARI
+
+* `server.port`
+  → Uygulamanın çalışacağı port (varsayılan: 8080)
+  Örn: `server.port=8081`
+
+* `server.address`
+  → Uygulamanın dinleyeceği IP adresi.
+  Örn: `server.address=127.0.0.1`
+
+* `server.servlet.context-path`
+  → Uygulamanın base URI’si.
+  Örn: `server.servlet.context-path=/api`
+
+* `server.servlet.session.timeout`
+  → Oturum süresi (süre: 30s, 15m, 2h, vb.)
+  Örn: `server.servlet.session.timeout=30m`
+
+* `server.error.whitelabel.enabled`
+  → Spring'in varsayılan hata sayfası etkin mi?
+  Örn: `server.error.whitelabel.enabled=false`
+
+* `server.error.include-stacktrace`
+  → Stack trace görünürlüğü (`never`, `on_trace_param`, `always`)
+
+---
+
+# 💾 3. VERİTABANI BAĞLANTISI (DATASOURCE)
+
+## 🔷 MySQL Örneği:
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/mydb?useSSL=false&serverTimezone=UTC
+spring.datasource.username=root
+spring.datasource.password=12345
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+```
+
+## 🔷 PostgreSQL Örneği:
+
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/mydb
+spring.datasource.username=postgres
+spring.datasource.password=12345
+spring.datasource.driver-class-name=org.postgresql.Driver
+```
+
+## 🔷 H2 Database (In-Memory):
+
+```properties
+spring.datasource.url=jdbc:h2:mem:testdb
+spring.datasource.driver-class-name=org.h2.Driver
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+```
+
+---
+
+# 🏗 4. JPA / HIBERNATE AYARLARI
+
+* `spring.jpa.hibernate.ddl-auto`
+  → Tablo şeması nasıl oluşturulsun?
+  Seçenekler: `none`, `validate`, `update`, `create`, `create-drop`
+
+* `spring.jpa.show-sql`
+  → Konsola SQL sorgularını yazdırır.
+
+* `spring.jpa.properties.hibernate.format_sql`
+  → SQL sorgularını daha okunabilir hale getirir.
+
+* `spring.jpa.open-in-view`
+  → Lazy loading yapılacaksa session’ın açık kalmasını sağlar (default: true)
+
+* `spring.jpa.properties.hibernate.dialect`
+  → Veritabanına özel dialect ayarı
+  Örn: `org.hibernate.dialect.MySQL8Dialect`
+
+---
+
+# 🧾 5. LOGGING AYARLARI
+
+* `logging.level.root=INFO`
+  → Tüm sistem için log seviyesi
+
+* `logging.level.org.springframework.web=DEBUG`
+  → Belirli bir pakete özel log seviyesi
+
+* `logging.file.name=logs/app.log`
+  → Log dosyasının adı
+
+* `logging.file.path=./logs`
+  → Log dosyasının yolu
+
+* `spring.output.ansi.enabled=ALWAYS`
+  → Renkli log çıktısı (IDE'de güzel görünür)
+
+---
+
+# 🧠 6. ACTUATOR AYARLARI
+
+* `management.endpoints.web.exposure.include=*`
+  → Tüm actuator endpoint’leri dışa açılır (`health`, `info`, `metrics`, `env`, ...)
+
+* `management.endpoint.health.show-details=always`
+  → Health endpoint detaylarını gösterir
+
+* `info.app.name=My App`
+  → /actuator/info endpoint’i için özel bilgiler
+
+---
+
+# 🎨 7. THYMELEAF TEMPLATE ENGINE
+
+* `spring.thymeleaf.enabled=true`
+* `spring.thymeleaf.cache=false`
+* `spring.thymeleaf.prefix=classpath:/templates/`
+* `spring.thymeleaf.suffix=.html`
+* `spring.thymeleaf.mode=HTML`
+
+---
+
+# 📁 8. STATIC DOSYALAR (JS, CSS, IMAGES)
+
+* `spring.web.resources.static-locations=classpath:/static/`
+* `spring.web.resources.cache.cachecontrol.no-store=true`
+  → Geliştirme aşamasında cache’i kapatmak için
+
+---
+
+# ✉ 9. MAIL AYARLARI (SMTP)
+
+```properties
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=myemail@gmail.com
+spring.mail.password=your_password
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+```
+
+---
+
+# 🌍 10. I18N / L10N (ÇOK DİLLİLİK)
+
+* `spring.messages.basename=messages`
+* `spring.messages.encoding=UTF-8`
+* `spring.messages.cache-duration=3600`
+* `spring.messages.default-locale=tr`
+
+---
+
+# 📎 11. MULTIPART (DOSYA YÜKLEME)
+
+```properties
+spring.servlet.multipart.enabled=true
+spring.servlet.multipart.max-file-size=10MB
+spring.servlet.multipart.max-request-size=20MB
+spring.servlet.multipart.file-size-threshold=2MB
+```
+
+---
+
+# 🛡 12. SPRING SECURITY AYARLARI
+
+* `spring.security.user.name=admin`
+* `spring.security.user.password=1234`
+  → Varsayılan kullanıcı tanımı
+
+---
+
+# 🔁 13. CACHING / REDIS
+
+```properties
+spring.cache.type=simple     # none, caffeine, redis, ehcache
+spring.redis.host=localhost
+spring.redis.port=6379
+```
+
+---
+
+# 🔁 14. TASK / ASYNC / SCHEDULER
+
+```properties
+spring.task.execution.pool.core-size=4
+spring.task.execution.pool.max-size=8
+spring.task.scheduling.pool.size=2
+```
+
+---
+
+# 🔄 15. JSON SERIALIZATION (JACKSON)
+
+```properties
+spring.jackson.date-format=yyyy-MM-dd
+spring.jackson.default-property-inclusion=non_null
+spring.jackson.serialization.indent_output=true
+```
+
+---
+
+# 🧪 16. TEST & MOCK CONFIG
+
+```properties
+spring.test.database.replace=NONE
+spring.datasource.initialization-mode=always
+```
+
+---
+
+# 🧩 17. CUSTOM / ÖZEL AYARLAR (KENDİ TANIMLARIN)
+
+```properties
+app.jwt.secret=mySecretKey
+app.jwt.expiration=3600
+app.upload.max=5MB
+```
+
+→ `@Value("${app.jwt.secret}")` veya `@ConfigurationProperties` ile kullanılabilir.
+
+---
+
+# 🔧 18. DEVELOPER TOOLS (DEVTOOLS)
+
+```properties
+spring.devtools.restart.enabled=true
+spring.devtools.livereload.enabled=true
+spring.devtools.remote.secret=abc123
+```
+
+---
+
+📌 İPUÇLARI:
+
+* `application.properties` yerine `application.yml` formatı da kullanılabilir (YAML daha okunabilir).
+* Her ortam için ayrı dosya yapılabilir:
+
+  * `application-dev.properties`
+  * `application-prod.properties`
+  * `application-test.properties`
+* Önerilen ayırım: Ortam bazlı config → profil bazlı çalışma.
+
+---
+
+🧠 SON SÖZ:
+Bu yapı, Spring Boot projende altyapıyı tam kontrol altına almanı sağlar. Bir mikroservis mimarisi, performanslı dosya yükleme, mailing sistemi ya da devreye alma ortamı olsun; hepsinin kalbi bu `application.properties` dosyasıdır.

@@ -5,56 +5,25 @@ import com.example.simple_service.entity.User;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Kullanıcı işlemleri için iş mantığını tanımlayan servis sözleşmesi.
- */
+// Bu arayüz (interface), User nesnesiyle ilgili iş mantığını tanımlar.
+// Controller ile Repository arasındaki katmandır. Amaç: veritabanı işlemleriyle iş kurallarını birbirinden ayırmaktır.
 public interface UserService {
 
-    /**
-     * Yeni bir kullanıcı kaydeder.
-     *
-     * @param user Kaydedilecek kullanıcı nesnesi
-     * @return Kaydedilen kullanıcı
-     */
+    // Yeni bir kullanıcıyı kaydeder (CREATE işlemi)
     User saveUser(User user);
 
-    /**
-     * Tüm kullanıcıları döndürür.
-     *
-     * @return Tüm kullanıcıları içeren bir liste
-     */
+    // Tüm kullanıcıları getirir (READ işlemi - listeleme)
     List<User> getAllUsers();
 
-    /**
-     * ID değeri verilen kullanıcıyı döndürür.
-     *
-     * @param id Kullanıcının ID değeri
-     * @return Varsa kullanıcı nesnesi, yoksa null
-     */
+    // Belirli bir kullanıcıyı ID'sine göre getirir (READ işlemi - tek kayıt)
     User getUserById(Long id);
 
-    /**
-     * Belirtilen ID değerine sahip kullanıcının bilgilerini günceller.
-     *
-     * @param id   Güncellenecek kullanıcının ID değeri
-     * @param user Yeni kullanıcı bilgilerini içeren nesne
-     * @return Güncellenmiş kullanıcı nesnesi, yoksa null
-     */
+    // Belirli bir kullanıcıyı günceller (UPDATE işlemi)
     User updateUser(Long id, User user);
 
-    /**
-     * Belirtilen ID değerine sahip kullanıcıyı siler.
-     *
-     * @param id Silinecek kullanıcının ID değeri
-     * @return Silme işlemi başarılıysa true, aksi halde false
-     */
+    // Belirli bir kullanıcıyı siler (DELETE işlemi)
     boolean deleteUser(Long id);
 
-    /**
-     * Belirtilen e-posta değerine sahip kullanıcıyı döndürür.
-     *
-     * @param email Kullanıcının e-posta adresi
-     * @return Varsa kullanıcıyı saran bir {@link Optional}, yoksa boş (empty)
-     */
+    // E-posta adresine göre kullanıcıyı bulur (READ işlemi)
     Optional<User> getUserByEmail(String email);
 }
