@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout}">
+<div th:fragment="content">
+    <div class="mb-6">
+        <h1 class="text-4xl font-bold mb-2">
+            <span th:if="${user != null and user.id != null}">✏️ Kullanıcı Düzenle</span>
+            <span th:if="${user == null or user.id == null}">➕ Yeni Kullanıcı Ekle</span>
+        </h1>
+        <p class="text-gray-300">Kullanıcı bilgilerini girin veya güncelleyin</p>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-xl border border-white/20 max-w-2xl mx-auto">
+        <form th:action="${user != null and user.id != null ? '/users/update/' + user.id : '/users/save'}" 
+              method="post">
+            
+            <!-- ID Field (hidden for new users, visible for edit) -->
+            <div th:if="${user != null and user.id != null}" class="mb-6">
+                <label class="block text-sm font-medium mb-2">Kullanıcı ID</label>
+                <input type="hidden" name="id" th:value="${user.id}">
+                <input type="text" th:value="${user.id}" readonly 
+                       class="w-full rounded-lg bg-gray-800/60 border border-gray-600 p-3 text-gray-400 cursor-not-allowed">
+            </div>
+
+            <!-- Name Field -->
+            <div class="mb-6">
+                <label for="name" class="block text-sm font-medium mb-2">
+                    İsim <span class="text-red-400">*</span>
+                </label>
+                <input type="text" 
+                       id="name" 
+                       name="name"
+                       th:value="${user != null ? user.name : ''}"
+                       required 
+                       placeholder="Kullanıcı adını girin"
+                       class="w-full rounded-lg bg-gray-800/40 border border-gray-600 p-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all">
+            </div>
+
+            <!-- Email Field -->
+            <div class="mb-6">
+                <label for="email" class="block text-sm font-medium mb-2">
+                    Email <span class="text-red-400">*</span>
+                </label>
+                <input type="email" 
+                       id="email" 
+                       name="email"
+                       th:value="${user != null ? user.email : ''}"
+                       required 
+                       placeholder="ornek@email.com"
+                       class="w-full rounded-lg bg-gray-800/40 border border-gray-600 p-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all">
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex gap-4">
+                <button type="submit" 
+                        class="flex-1 px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold transition-colors shadow-lg">
+                    <span th:if="${user != null and user.id != null}">💾 Güncelle</span>
+                    <span th:if="${user == null or user.id == null}">✨ Kaydet</span>
+                </button>
+                <a href="/users/view" 
+                   class="px-6 py-3 bg-gray-600 hover:bg-gray-700 rounded-lg font-semibold transition-colors">
+                    ❌ İptal
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Help Text -->
+    <div class="mt-6 bg-blue-500/20 backdrop-blur-sm rounded-xl p-4 max-w-2xl mx-auto border border-blue-400/30">
+        <p class="text-sm text-gray-200">
+            <strong>💡 İpucu:</strong> Email adresi benzersiz olmalıdır. Aynı email ile birden fazla kullanıcı kaydedilemez.
+        </p>
+    </div>
+</div>
+

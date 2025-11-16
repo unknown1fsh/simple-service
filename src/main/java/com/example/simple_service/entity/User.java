@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 // Bu sınıfın bir veritabanı tablosunu temsil ettiğini belirtir
 @Entity
 // Tablonun adı ve benzersiz (unique) kolon kısıtlaması tanımlanır
@@ -37,6 +39,35 @@ public class User {
     private String name;
 
     // Kullanıcının email adresi. Bu alan da zorunlu ve maksimum 150 karakter olabilir
-    @Column(name = "email", nullable = false, length = 150)
+    @Column(name = "email", nullable = false, length = 150, unique = true)
     private String email;
+
+    // Kayıt oluşturulma tarihi (nullable - mevcut kayıtlar için null olabilir)
+    @Column(name = "created_at", nullable = true, updatable = false)
+    private LocalDateTime createdAt;
+
+    // Son güncelleme tarihi (nullable - mevcut kayıtlar için null olabilir)
+    @Column(name = "updated_at", nullable = true)
+    private LocalDateTime updatedAt;
+
+    // Entity kaydedilmeden önce tarihleri otomatik ayarla
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+        if (updatedAt == null) {
+            updatedAt = LocalDateTime.now();
+        }
+    }
+
+    // Entity güncellenmeden önce updatedAt'i güncelle
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+        // Eğer createdAt null ise (eski kayıtlar için), şimdiki zamanı ata
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
 }

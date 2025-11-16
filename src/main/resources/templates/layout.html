@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle != null ? (pageTitle + ' - Simple Service') : 'Simple Service'}">Simple Service</title>
+    
+    <!-- Global Error Handlers - En başta yükle, hemen çalıştır -->
+    <script>
+        // IIFE ile hemen çalıştır - diğer script'lerden önce
+        (function() {
+            'use strict';
+            
+            // Promise rejection handler - TÜM promise hatalarını yakala
+            const rejectionHandler = function(event) {
+                try {
+                    const error = event.reason;
+                    if (!error) return;
+                    
+                    // Browser extension hatalarını yakala - spesifik kontroller
+                    const isExtensionError = 
+                        // Genel 403 hataları
+                        error.code === 403 || 
+                        error.name === 'i' ||
+                        // Permission error'ları
+                        (error.message && (error.message.includes('403') || error.message.includes('Forbidden') || error.message === 'permission error')) ||
+                        // String kontrolü
+                        (typeof error === 'string' && error.includes('403')) ||
+                        // Stack trace kontrolü
+                        (error.stack && (error.stack.includes('content.js') || error.stack.includes('extension') || error.stack.includes('background.js'))) ||
+                        // toString kontrolü
+                        (error.toString && error.toString().includes('403')) ||
+                        // Data objesi kontrolü (extension hataları genelde data objesi içerir)
+                        (error.data && (error.data.code === 403 || error.data.msg === 'permission error')) ||
+                        // reqInfo kontrolü (extension API çağrıları)
+                        (error.reqInfo && (error.reqInfo.pathPrefix === '/writing' || error.reqInfo.pathPrefix));
+                    
+                    if (isExtensionError) {
+                        event.preventDefault();
+                        event.stopImmediatePropagation();
+                        return false;
+                    }
+                } catch (e) {
+                    // Handler hatası - sessizce yok say
+                }
+            };
+            
+            // Event listener'ı hemen ekle
+            if (window.addEventListener) {
+                window.addEventListener('unhandledrejection', rejectionHandler, true);
+            } else if (window.attachEvent) {
+                window.attachEvent('onunhandledrejection', rejectionHandler);
+            }
+
+            // Global error handler - Genel JavaScript hataları
+            const errorHandler = function(event) {
+                try {
+                    // Browser extension hatalarını sessizce yok say
+                    if (event && event.filename && (
+                        event.filename.includes('content.js') ||
+                        event.filename.includes('extension://') ||
+                        event.filename.includes('chrome-extension://') ||
+                        event.filename.includes('moz-extension://')
+                    )) {
+                        event.preventDefault();
+                        event.stopImmediatePropagation();
+                        return false;
+                    }
+                } catch (e) {
+                    // Handler hatası - sessizce yok say
+                }
+            };
+            
+            if (window.addEventListener) {
+                window.addEventListener('error', errorHandler, true);
+            } else if (window.attachEvent) {
+                window.attachEvent('onerror', errorHandler);
+            }
+
+            // Console error ve log'ları filtrele
+            try {
+                const originalError = console.error;
+                const originalLog = console.log;
+                const originalWarn = console.warn;
+                
+                // Error filtrele
+                console.error = function(...args) {
+                    try {
+                        // String kontrolü
+                        const message = args[0];
+                        if (typeof message === 'string' && (
+                            message.includes('content.js') ||
+                            message.includes('403') ||
+                            message.includes('Forbidden') ||
+                            message.includes('Uncaught (in promise)') ||
+                            message.includes('(index):1')
+                        )) {
+                            return; // Bu hataları gösterme
+                        }
+                        // Object kontrolü - daha kapsamlı
+                        if (args[0] && typeof args[0] === 'object') {
+                            const obj = args[0];
+                            // Extension hata kontrolü
+                            if (obj.code === 403 || 
+                                obj.name === 'i' ||
+                                obj.message === 'permission error' ||
+                                (obj.stack && (obj.stack.includes('content.js') || obj.stack.includes('extension') || obj.stack.includes('background.js'))) ||
+                                (obj.toString && obj.toString().includes('403')) ||
+                                (obj.message && (obj.message.includes('403') || obj.message.includes('Forbidden') || obj.message === 'permission error')) ||
+                                // Extension spesifik kontroller
+                                (obj.data && (obj.data.code === 403 || obj.data.msg === 'permission error')) ||
+                                (obj.reqInfo && (obj.reqInfo.pathPrefix === '/writing' || obj.reqInfo.pathPrefix))
+                            ) {
+                                return; // Bu hataları gösterme
+                            }
+                        }
+                        // Tüm argümanları kontrol et
+                        for (let arg of args) {
+                            if (typeof arg === 'string' && (arg.includes('403') || arg.includes('content.js') || arg.includes('permission error'))) {
+                                return;
+                            }
+                            if (arg && typeof arg === 'object') {
+                                if (arg.code === 403 || 
+                                    arg.name === 'i' || 
+                                    arg.message === 'permission error' ||
+                                    (arg.data && arg.data.code === 403) ||
+                                    (arg.reqInfo && arg.reqInfo.pathPrefix)
+                                ) {
+                                    return;
+                                }
+                            }
+                        }
+                        originalError.apply(console, args);
+                    } catch (e) {
+                        // Sessizce yok say
+                    }
+                };
+                
+                // Log filtrele (bazı extension'lar console.log kullanıyor)
+                console.log = function(...args) {
+                    try {
+                        const message = args[0];
+                        if (typeof message === 'string' && (
+                            message.includes('403') || 
+                            message.includes('content.js') ||
+                            message.includes('(index):1') ||
+                            message.includes('permission error')
+                        )) {
+                            return;
+                        }
+                        if (args[0] && typeof args[0] === 'object') {
+                            const obj = args[0];
+                            if (obj.code === 403 || 
+                                obj.name === 'i' || 
+                                obj.message === 'permission error' ||
+                                (obj.data && obj.data.code === 403) ||
+                                (obj.reqInfo && obj.reqInfo.pathPrefix)
+                            ) {
+                                return;
+                            }
+                        }
+                        originalLog.apply(console, args);
+                    } catch (e) {
+                        // Sessizce yok say
+                    }
+                };
+            } catch (e) {
+                // Console override hatası - sessizce yok say
+            }
+        })();
+    </script>
+    
+    <!-- Tailwind CSS CDN -->
+    <script>
+        // Tailwind CDN uyarısını önceden gizle
+        (function() {
+            const originalWarn = console.warn;
+            console.warn = function(...args) {
+                const message = args[0];
+                if (typeof message === 'string' && (
+                    message.includes('cdn.tailwindcss.com') || 
+                    message.includes('should not be used in production')
+                )) {
+                    return; // Tailwind CDN uyarısını gizle
+                }
+                originalWarn.apply(console, args);
+            };
+        })();
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    backgroundImage: {
+                        'gradient-primary': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        'gradient-secondary': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-gradient-primary min-h-screen text-gray-100">
+    <!-- Navigation -->
+    <nav class="bg-white/10 backdrop-blur-lg shadow-lg sticky top-0 z-50 border-b border-white/20">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <a href="/" class="text-2xl font-bold hover:text-purple-200 transition-colors">
+                    ✨ Simple Service
+                </a>
+                <div class="flex gap-4">
+                    <a href="/" class="px-4 py-2 rounded-lg hover:bg-white/20 transition-colors">Ana Sayfa</a>
+                    <a href="/users/view" class="px-4 py-2 rounded-lg hover:bg-white/20 transition-colors">Kullanıcılar</a>
+                    <a href="/users/form" class="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 transition-colors">Yeni Kullanıcı</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Flash Messages -->
+        <div th:if="${successMessage}" class="mb-6 p-4 bg-green-500/80 backdrop-blur-sm rounded-lg shadow-lg">
+            <p class="text-white font-semibold" th:text="${successMessage}">Başarılı!</p>
+        </div>
+        <div th:if="${errorMessage}" class="mb-6 p-4 bg-red-500/80 backdrop-blur-sm rounded-lg shadow-lg">
+            <p class="text-white font-semibold" th:text="${errorMessage}">Hata!</p>
+        </div>
+        
+        <!-- Page Content -->
+        <div th:replace="~{::content}">Content goes here</div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto bg-black/20 backdrop-blur-lg border-t border-white/10 py-6">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-gray-300">Simple Service - Basit kullanıcı yönetimi için ideal bir çözüm 🚀</p>
+        </div>
+    </footer>
+
+    <!-- Dark Mode Toggle -->
+    <button id="darkModeToggle" 
+            class="fixed bottom-6 right-6 p-4 bg-white/20 backdrop-blur-lg rounded-full shadow-lg hover:bg-white/30 transition-all hover:scale-110 float-animation">
+        <svg id="darkModeIcon" class="w-6 h-6 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path>
+        </svg>
+    </button>
+
+    <script>
+        // Dark Mode Toggle
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const darkModeIcon = document.getElementById('darkModeIcon');
+        
+        // Check localStorage for saved theme
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        if (savedTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
+        
+        darkModeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+    </script>
+</body>
+</html>

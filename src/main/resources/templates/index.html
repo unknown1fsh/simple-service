@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout}">
+<div th:fragment="content">
+    <!-- Hero Section -->
+    <div class="text-center mb-12">
+        <h1 class="text-5xl font-bold mb-4 float-animation">🌟 Simple Service'e Hoş Geldiniz!</h1>
+        <p class="text-xl text-gray-200 mb-8">Kullanıcı yönetimi için basit, hızlı ve güvenilir bir çözüm</p>
+        <div class="flex gap-4 justify-center">
+            <a href="/users/view" class="px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold transition-colors shadow-lg">
+                Kullanıcıları Görüntüle
+            </a>
+            <a href="/users/form" class="px-6 py-3 bg-white/20 hover:bg-white/30 rounded-lg font-semibold transition-colors backdrop-blur-sm">
+                Yeni Kullanıcı Ekle
+            </a>
+        </div>
+    </div>
+
+    <!-- Features Grid -->
+    <div class="grid md:grid-cols-3 gap-6 mb-12">
+        <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-shadow border border-white/20">
+            <div class="text-4xl mb-4">🚀</div>
+            <h3 class="text-xl font-semibold mb-2">Hızlı ve Basit</h3>
+            <p class="text-gray-300">Spring Boot 3 ile güçlendirilmiş, minimal kod ile maksimum performans</p>
+        </div>
+        <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-shadow border border-white/20">
+            <div class="text-4xl mb-4">💎</div>
+            <h3 class="text-xl font-semibold mb-2">Modern UI</h3>
+            <p class="text-gray-300">Thymeleaf ve Tailwind CSS ile tasarlanmış şık ve responsive arayüz</p>
+        </div>
+        <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-shadow border border-white/20">
+            <div class="text-4xl mb-4">🔒</div>
+            <h3 class="text-xl font-semibold mb-2">Güvenli</h3>
+            <p class="text-gray-300">MySQL veritabanı ile güvenli veri saklama ve yönetim</p>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-xl border border-white/20">
+        <h2 class="text-2xl font-semibold mb-6 text-center">📊 Proje İstatistikleri</h2>
+        <div class="grid md:grid-cols-4 gap-6 text-center">
+            <div>
+                <div class="text-3xl font-bold text-purple-300" th:text="${totalUsers != null ? totalUsers : '0'}">0</div>
+                <div class="text-gray-300 mt-2">Toplam Kullanıcı</div>
+            </div>
+            <div>
+                <div class="text-3xl font-bold text-blue-300">Spring Boot 3</div>
+                <div class="text-gray-300 mt-2">Framework</div>
+            </div>
+            <div>
+                <div class="text-3xl font-bold text-green-300">MySQL</div>
+                <div class="text-gray-300 mt-2">Veritabanı</div>
+            </div>
+            <div>
+                <div class="text-3xl font-bold text-yellow-300">Thymeleaf</div>
+                <div class="text-gray-300 mt-2">Template Engine</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="mt-12 bg-gradient-secondary rounded-2xl p-8 shadow-2xl">
+        <h2 class="text-3xl font-bold mb-6 text-center">⚡ Hızlı İşlemler</h2>
+        <div class="grid md:grid-cols-2 gap-6">
+            <a href="/users/form" class="bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl p-6 transition-all hover:scale-105">
+                <div class="text-2xl mb-2">➕</div>
+                <h3 class="text-xl font-semibold mb-2">Yeni Kullanıcı Ekle</h3>
+                <p class="text-gray-200">Hemen yeni bir kullanıcı kaydı oluşturun</p>
+            </a>
+            <a href="/users/view" class="bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl p-6 transition-all hover:scale-105">
+                <div class="text-2xl mb-2">👥</div>
+                <h3 class="text-xl font-semibold mb-2">Tüm Kullanıcıları Görüntüle</h3>
+                <p class="text-gray-200">Kayıtlı tüm kullanıcıları listeleyin ve yönetin</p>
+            </a>
+        </div>
+    </div>
+</div>
+
