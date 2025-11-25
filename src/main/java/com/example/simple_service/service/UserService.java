@@ -2,6 +2,8 @@ package com.example.simple_service.service;
 
 import com.example.simple_service.entity.User;
 import com.example.simple_service.service.base.BaseService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 
@@ -36,6 +38,23 @@ public interface UserService extends BaseService<User, Long> {
      * @return Optional<User> - Kullanıcı bulunursa içinde, bulunamazsa boş
      */
     Optional<User> getUserByEmail(String email);
+    
+    /**
+     * Sayfalama ile tüm kullanıcıları getirir
+     * 
+     * @param pageable Sayfalama bilgileri (sayfa numarası, sayfa başına kayıt sayısı)
+     * @return Page<User> - Sayfalanmış kullanıcı listesi
+     */
+    Page<User> findAll(Pageable pageable);
+    
+    /**
+     * İsme göre sayfalama ile kullanıcıları getirir
+     * 
+     * @param name Aranacak isim (kısmi eşleşme, case-insensitive)
+     * @param pageable Sayfalama bilgileri
+     * @return Page<User> - Sayfalanmış kullanıcı listesi
+     */
+    Page<User> findByNameContainingIgnoreCase(String name, Pageable pageable);
     
     // Not: BaseService'den gelen metodlar:
     // - User save(User user) - saveUser yerine save kullanılır

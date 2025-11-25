@@ -2,6 +2,10 @@ package com.example.simple_service.controller;
 
 import com.example.simple_service.entity.User;
 import com.example.simple_service.service.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -9,7 +13,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * User View Controller
@@ -84,6 +87,10 @@ public class UserViewController {
      * - name: İsme göre arama (contains - içerir)
      * - email: Email'e göre arama (exact match)
      * 
+     * Pagination parametreleri:
+     * - page: Sayfa numarası (0'dan başlar, varsayılan: 0)
+     * - size: Sayfa başına kayıt sayısı (varsayılan: 15)
+     * 
      * HTTP Method: GET
      * Endpoint: /users/view
      * Template: users/list.html
@@ -91,6 +98,8 @@ public class UserViewController {
      * @param id Arama parametresi - Kullanıcı ID'si
      * @param name Arama parametresi - Kullanıcı adı (kısmi eşleşme)
      * @param email Arama parametresi - Email adresi (tam eşleşme)
+     * @param page Sayfa numarası (0'dan başlar)
+     * @param size Sayfa başına kayıt sayısı (15, 30, 50, 100)
      * @param model Thymeleaf template'e veri aktarmak için kullanılır
      * @return Template adı (users/list.html)
      */
@@ -99,8 +108,19 @@ public class UserViewController {
             @RequestParam(required = false) Long id,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String email,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "15") int size,
             Model model) {
         
+        // Size değerini geçerli değerlerle sınırla (15, 30, 50, 100)
+        if (size != 15 && size != 30 && size != 50 && size != 100) {
+            size = 15;
+        }
+        
+        // Pageable oluştur (ID'ye göre sıralama)
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
+        
+        Page<User> userPage;
         List<User> users;
         
         // Arama parametrelerine göre filtreleme
@@ -108,25 +128,65 @@ public class UserViewController {
             // ID'ye göre arama - BaseService'deki findById() metodu
             User user = userService.findById(id);
             users = user != null ? List.of(user) : List.of();
+            // Tek kayıt için Page oluştur
+            userPage = null; // ID araması için pagination yok
         } else if (name != null && !name.trim().isEmpty()) {
-            // İsme göre arama - tüm kullanıcıları al ve filtrele (case-insensitive)
-            // BaseService'deki findAll() metodu
-            users = userService.findAll().stream()
-                    .filter(u -> u.getName() != null && u.getName().toLowerCase().contains(name.toLowerCase()))
-                    .collect(Collectors.toList());
+            // İsme göre sayfalama ile arama
+            userPage = userService.findByNameContainingIgnoreCase(name.trim(), pageable);
+            users = userPage.getContent();
         } else if (email != null && !email.trim().isEmpty()) {
             // Email'e göre arama - UserService'e özel getUserByEmail() metodu
-            Optional<User> userOpt = userService.getUserByEmail(email);
+            Optional<User> userOpt = userService.getUserByEmail(email.trim());
             users = userOpt.map(List::of).orElse(List.of());
+            userPage = null; // Email araması için pagination yok
         } else {
-            // Arama parametresi yoksa tüm kullanıcıları getir
-            // BaseService'deki findAll() metodu
-            users = userService.findAll();
+            // Arama parametresi yoksa sayfalama ile tüm kullanıcıları getir
+            userPage = userService.findAll(pageable);
+            users = userPage.getContent();
         }
         
         // Model'e verileri ekle (Thymeleaf template'inde kullanılacak)
         model.addAttribute("users", users);
         model.addAttribute("pageTitle", "Kullanıcı Listesi");
+        
+        // Pagination bilgileri
+        if (userPage != null) {
+            int currentPageNum = userPage.getNumber();
+            int totalPagesNum = userPage.getTotalPages();
+            
+            // Sayfa numaralarını hesapla (mevcut sayfa ve çevresindeki sayfalar)
+            int startPage = Math.max(0, currentPageNum - 1);
+            int endPage = Math.min(totalPagesNum - 1, currentPageNum + 1);
+            List<Integer> pageNumbers = new java.util.ArrayList<>();
+            for (int i = startPage; i <= endPage; i++) {
+                pageNumbers.add(i);
+            }
+            
+            model.addAttribute("userPage", userPage);
+            model.addAttribute("currentPage", currentPageNum);
+            model.addAttribute("totalPages", totalPagesNum);
+            model.addAttribute("totalElements", userPage.getTotalElements());
+            model.addAttribute("pageSize", size);
+            model.addAttribute("hasPrevious", userPage.hasPrevious());
+            model.addAttribute("hasNext", userPage.hasNext());
+            model.addAttribute("pageNumbers", pageNumbers);
+        } else {
+            // ID veya email araması için pagination yok
+            model.addAttribute("userPage", null);
+            model.addAttribute("currentPage", 0);
+            model.addAttribute("totalPages", 1);
+            model.addAttribute("totalElements", users.size());
+            model.addAttribute("pageSize", size);
+            model.addAttribute("hasPrevious", false);
+            model.addAttribute("hasNext", false);
+            model.addAttribute("pageNumbers", List.of(0));
+        }
+        
+        // Arama parametrelerini koru
+        model.addAttribute("searchId", id);
+        model.addAttribute("searchName", name);
+        model.addAttribute("searchEmail", email);
+        
         return "users/list"; // src/main/resources/templates/users/list.html
     }
 

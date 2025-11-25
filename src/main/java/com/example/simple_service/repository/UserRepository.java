@@ -2,6 +2,8 @@ package com.example.simple_service.repository;
 
 import com.example.simple_service.entity.User;
 import com.example.simple_service.repository.base.BaseRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -40,4 +42,21 @@ public interface UserRepository extends BaseRepository<User, Long> {
      * @return Optional<User> - Kullanıcı bulunursa içinde, bulunamazsa boş
      */
     Optional<User> findByEmail(String email);
+    
+    /**
+     * İsme göre sayfalama ile kullanıcıları bulur
+     * 
+     * Spring Data JPA, metod ismine göre otomatik olarak şu SQL sorgusunu oluşturur:
+     * SELECT * FROM app_user WHERE LOWER(name) LIKE LOWER(?) ORDER BY ... LIMIT ... OFFSET ...
+     * 
+     * Naming Convention:
+     * - findByName: name kolonuna göre arama
+     * - Containing: LIKE '%?%' (içerir)
+     * - IgnoreCase: Case-insensitive arama
+     * 
+     * @param name Aranacak isim (kısmi eşleşme)
+     * @param pageable Sayfalama bilgileri
+     * @return Page<User> - Sayfalanmış kullanıcı listesi
+     */
+    Page<User> findByNameContainingIgnoreCase(String name, Pageable pageable);
 }

@@ -4,6 +4,8 @@ import com.example.simple_service.entity.User;
 import com.example.simple_service.repository.UserRepository;
 import com.example.simple_service.service.UserService;
 import com.example.simple_service.service.base.BaseServiceImpl;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -182,5 +184,28 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long, UserRepository>
     @Override
     public Optional<User> getUserByEmail(String email) {
         return repository.findByEmail(email);
+    }
+    
+    /**
+     * Sayfalama ile tüm kullanıcıları getirir
+     * 
+     * @param pageable Sayfalama bilgileri (sayfa numarası, sayfa başına kayıt sayısı)
+     * @return Page<User> - Sayfalanmış kullanıcı listesi
+     */
+    @Override
+    public Page<User> findAll(Pageable pageable) {
+        return repository.findAll(pageable);
+    }
+    
+    /**
+     * İsme göre sayfalama ile kullanıcıları getirir
+     * 
+     * @param name Aranacak isim (kısmi eşleşme, case-insensitive)
+     * @param pageable Sayfalama bilgileri
+     * @return Page<User> - Sayfalanmış kullanıcı listesi
+     */
+    @Override
+    public Page<User> findByNameContainingIgnoreCase(String name, Pageable pageable) {
+        return repository.findByNameContainingIgnoreCase(name, pageable);
     }
 }
