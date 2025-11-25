@@ -3,32 +3,59 @@ package com.example.simple_service.service.impl;
 import com.example.simple_service.entity.User;
 import com.example.simple_service.repository.UserRepository;
 import com.example.simple_service.service.UserService;
+import com.example.simple_service.service.base.BaseServiceImpl;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-// Bu sınıf, UserService interface'ini implemente eder ve gerçek iş mantığını içerir.
-// @Service anotasyonu sayesinde Spring tarafından otomatik olarak bean olarak tanımlanır.
+/**
+ * User Service Implementation
+ * 
+ * Bu sınıf, UserService interface'inin implementasyonudur.
+ * Layered Architecture'da Service katmanında yer alır.
+ * 
+ * BaseServiceImpl'den extend edilerek:
+ * - save(), findAll(), findById(), update(), delete() gibi temel CRUD metodları otomatik sağlanır
+ * - User'a özel iş mantığı (validation, email kontrolü vb.) burada uygulanır
+ * 
+ * @Service: Spring tarafından otomatik olarak bean olarak tanımlanır ve dependency injection'a dahil edilir
+ * 
+ * Design Patterns:
+ * - Template Method Pattern: BaseServiceImpl'deki base metodlar, alt sınıflarda override edilebilir
+ * - Dependency Injection: Constructor injection ile UserRepository enjekte edilir
+ */
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl extends BaseServiceImpl<User, Long, UserRepository> 
+        implements UserService {
 
-    // Veritabanı işlemleri için UserRepository kullanılır
-    private final UserRepository userRepository;
-
-    // Email validation için regex pattern
+    /**
+     * Email formatı validasyonu için regex pattern
+     * Pattern.compile() ile bir kez derlenir ve tekrar kullanılır (performans)
+     */
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
         "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
     );
 
-    // Constructor-based dependency injection (tavsiye edilen yöntem)
+    /**
+     * Constructor - Dependency Injection
+     * 
+     * BaseServiceImpl'in constructor'ına repository'yi geçirir.
+     * Constructor injection, Spring'de en çok tavsiye edilen dependency injection yöntemidir.
+     * 
+     * @param userRepository User entity için repository
+     */
     public UserServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
+        super(userRepository);
     }
 
     /**
      * Email formatını kontrol eder
+     * 
+     * Regex pattern kullanarak email formatının geçerli olup olmadığını kontrol eder.
+     * 
+     * @param email Kontrol edilecek email adresi
+     * @return Email formatı geçerliyse true, değilse false
      */
     private boolean isValidEmail(String email) {
         if (email == null || email.trim().isEmpty()) {
@@ -39,6 +66,14 @@ public class UserServiceImpl implements UserService {
 
     /**
      * Kullanıcı verilerini validate eder
+     * 
+     * User entity'sinin tüm alanlarını kontrol eder:
+     * - Entity null kontrolü
+     * - Name boşluk ve uzunluk kontrolü
+     * - Email format ve uzunluk kontrolü
+     * 
+     * @param user Validasyon yapılacak kullanıcı
+     * @throws IllegalArgumentException Validasyon hatası durumunda
      */
     private void validateUser(User user) {
         if (user == null) {
@@ -61,86 +96,91 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    // Yeni kullanıcıyı veritabanına kaydeder
+    /**
+     * Yeni bir kullanıcıyı kaydeder
+     * 
+     * BaseServiceImpl'deki save() metodunu override ederek User'a özel validasyon ekler:
+     * - Email format kontrolü
+     * - Email duplicate kontrolü
+     * - String trim işlemleri
+     * 
+     * @param user Kaydedilecek kullanıcı
+     * @return Kaydedilen kullanıcı (ID ve timestamp'ler ile birlikte)
+     * @throws IllegalArgumentException Validasyon hatası veya duplicate email durumunda
+     */
     @Override
-    public User saveUser(User user) {
-        // Validation
+    public User save(User user) {
+        // User'a özel validasyon
         validateUser(user);
         
-        // Email duplicate kontrolü
-        Optional<User> existingUser = userRepository.findByEmail(user.getEmail().trim());
+        // Email duplicate kontrolü - aynı email ile kayıt olmamalı
+        Optional<User> existingUser = repository.findByEmail(user.getEmail().trim());
         if (existingUser.isPresent()) {
             throw new IllegalArgumentException("Bu email adresi zaten kullanılıyor: " + user.getEmail());
         }
         
-        // Email'i trim et
+        // String alanları trim et (başında/sonunda boşluk varsa temizle)
         user.setEmail(user.getEmail().trim());
         user.setName(user.getName().trim());
         
-        return userRepository.save(user);
+        // BaseServiceImpl'deki save() metodunu çağır
+        return super.save(user);
     }
 
-    // Tüm kullanıcıları veritabanından getirir
+    /**
+     * Mevcut bir kullanıcıyı günceller
+     * 
+     * BaseServiceImpl'deki update() metodunu override ederek User'a özel validasyon ekler:
+     * - Email format kontrolü
+     * - Email değişikliği durumunda duplicate kontrolü
+     * - String trim işlemleri
+     * 
+     * @param id Güncellenecek kullanıcının ID'si
+     * @param user Güncellenecek yeni veriler
+     * @return Güncellenmiş kullanıcı, bulunamazsa null
+     * @throws IllegalArgumentException Validasyon hatası veya duplicate email durumunda
+     */
     @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-
-    // ID'ye göre kullanıcıyı getirir; yoksa null döner
-    @Override
-    public User getUserById(Long id) {
-        Optional<User> user = userRepository.findById(id);
-        return user.orElse(null); // Eğer kullanıcı bulunamazsa null döner
-    }
-
-    // Mevcut bir kullanıcıyı günceller (adı ve email bilgisi güncellenir)
-    @Override
-    public User updateUser(Long id, User user) {
-        if (id == null) {
-            throw new IllegalArgumentException("Kullanıcı ID'si boş olamaz!");
-        }
+    public User update(Long id, User user) {
+        // BaseServiceImpl'deki validasyon (id ve entity null kontrolü)
+        // validateBeforeUpdate() metodu otomatik çağrılır
         
-        User existingUser = getUserById(id); // Önce ID'ye göre kullanıcı alınır
+        // Mevcut kullanıcıyı bul
+        User existingUser = findById(id);
         if (existingUser == null) {
-            return null; // Kullanıcı bulunamazsa null döner
+            return null; // Kullanıcı bulunamadı
         }
         
-        // Validation
+        // User'a özel validasyon
         validateUser(user);
         
         // Email değişikliği kontrolü - eğer email değiştiyse duplicate kontrolü yap
         String newEmail = user.getEmail().trim();
         if (!newEmail.equals(existingUser.getEmail())) {
-            Optional<User> emailUser = userRepository.findByEmail(newEmail);
+            Optional<User> emailUser = repository.findByEmail(newEmail);
             if (emailUser.isPresent() && !emailUser.get().getId().equals(id)) {
                 throw new IllegalArgumentException("Bu email adresi başka bir kullanıcı tarafından kullanılıyor: " + newEmail);
             }
         }
         
-        // Kullanıcı varsa adı ve email bilgisi güncellenir
+        // Mevcut kullanıcının alanlarını güncelle
         existingUser.setName(user.getName().trim());
         existingUser.setEmail(newEmail);
         
-        // Güncellenmiş kullanıcı veritabanına tekrar kaydedilir
-        return userRepository.save(existingUser);
+        // BaseServiceImpl'deki save() metodunu kullanarak güncelle
+        return repository.save(existingUser);
     }
 
-    // Belirli bir kullanıcıyı siler, başarılıysa true döner
-    @Override
-    public boolean deleteUser(Long id) {
-        Optional<User> userOptional = userRepository.findById(id);
-        if (userOptional.isPresent()) {
-            // Kullanıcı bulunduysa silinir
-            userRepository.delete(userOptional.get());
-            return true;
-        }
-        // Kullanıcı bulunamazsa silme işlemi gerçekleşmez
-        return false;
-    }
-
-    // Email'e göre kullanıcıyı getirir
+    /**
+     * Email adresine göre kullanıcıyı bulur
+     * 
+     * User'a özel bir metod. BaseService'de yoktur.
+     * 
+     * @param email Aranacak email adresi
+     * @return Optional<User> - Kullanıcı bulunursa içinde, bulunamazsa boş
+     */
     @Override
     public Optional<User> getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+        return repository.findByEmail(email);
     }
 }

@@ -1,73 +1,86 @@
 package com.example.simple_service.entity;
 
-// JPA (Java Persistence API) için gerekli anotasyonlar
+import com.example.simple_service.entity.base.BaseEntity;
 import jakarta.persistence.*;
-
-// Lombok kütüphanesinden gelen anotasyonlar: getter, setter, constructor, builder gibi kodları otomatik üretir
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
-// Bu sınıfın bir veritabanı tablosunu temsil ettiğini belirtir
+/**
+ * User Entity Sınıfı
+ * 
+ * Bu sınıf, kullanıcı bilgilerini temsil eden JPA entity'sidir.
+ * Layered Architecture'da Entity katmanında yer alır.
+ * 
+ * BaseEntity'den extend edilerek:
+ * - id (Long tipinde)
+ * - createdAt (oluşturulma tarihi)
+ * - updatedAt (güncellenme tarihi)
+ * alanları otomatik olarak miras alınır.
+ * 
+ * @Entity: Bu sınıfın bir JPA entity'si olduğunu belirtir
+ * @Table: Veritabanı tablo yapılandırması
+ * - name: Tablo adı (app_user)
+ * - uniqueConstraints: Email kolonu için unique constraint
+ * 
+ * Lombok Anotasyonları:
+ * - @Data: getter, setter, toString, equals, hashCode otomatik oluşturur
+ * - @Builder: Builder pattern ile nesne oluşturmayı sağlar
+ * - @NoArgsConstructor: Parametresiz constructor
+ * - @AllArgsConstructor: Tüm alanları içeren constructor
+ * - @EqualsAndHashCode(callSuper = true): BaseEntity'den gelen alanları da equals/hashCode'a dahil eder
+ */
 @Entity
-// Tablonun adı ve benzersiz (unique) kolon kısıtlaması tanımlanır
 @Table(
         name = "app_user", // Veritabanındaki tablo adı
-        uniqueConstraints = {@UniqueConstraint(columnNames = "email")} // "email" kolonu benzersiz olmalı (aynı email birden fazla kayıt olamaz
+        uniqueConstraints = {
+            @UniqueConstraint(name = "uk_app_user_email", columnNames = "email") // Email kolonu benzersiz olmalı
+        },
+        indexes = {
+            @Index(name = "idx_app_user_email", columnList = "email"), // Email için index (sorgu performansı)
+            @Index(name = "idx_app_user_created_at", columnList = "created_at"), // Created_at için index (tarih bazlı sorgular)
+            @Index(name = "idx_app_user_updated_at", columnList = "updated_at") // Updated_at için index (tarih bazlı sorgular)
+        }
 )
-// Lombok anotasyonları:
-// @Data → getter, setter, toString, equals, hashCode otomatik oluşturur
-// @Builder → builder pattern ile nesne oluşturmayı sağlar
-// @NoArgsConstructor → parametresiz constructor üretir
-// @AllArgsConstructor → tüm alanları içeren constructor üretir
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+@EqualsAndHashCode(callSuper = true) // BaseEntity'den gelen alanları da equals/hashCode'a dahil et
+public class User extends BaseEntity<Long> {
 
-    // Birincil anahtar (primary key) alanı
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Otomatik artan ID kullanılır
-    private Long id;
-
-    // Kullanıcının adı. Bu alan boş bırakılamaz (nullable = false) ve en fazla 100 karakter olabilir
-    @Column(name = "name", nullable = false, length = 100)
+    /**
+     * Kullanıcının adı
+     * 
+     * @Column anotasyonu ile:
+     * - name: Veritabanı kolon adı (name - snake_case)
+     * - nullable = false: Boş olamaz (zorunlu alan)
+     * - length = 100: Maksimum 100 karakter
+     * - columnDefinition: MySQL ve PostgreSQL uyumlu VARCHAR tanımı
+     */
+    @Column(name = "name", nullable = false, length = 100, columnDefinition = "VARCHAR(100) NOT NULL")
     private String name;
 
-    // Kullanıcının email adresi. Bu alan da zorunlu ve maksimum 150 karakter olabilir
-    @Column(name = "email", nullable = false, length = 150, unique = true)
+    /**
+     * Kullanıcının email adresi
+     * 
+     * @Column anotasyonu ile:
+     * - name: Veritabanı kolon adı (email - snake_case)
+     * - nullable = false: Boş olamaz (zorunlu alan)
+     * - length = 150: Maksimum 150 karakter
+     * - columnDefinition: MySQL ve PostgreSQL uyumlu VARCHAR tanımı
+     * 
+     * Not: 
+     * - Unique constraint @Table seviyesinde tanımlıdır (daha güvenli ve performanslı)
+     * - Index @Table seviyesinde tanımlıdır (sorgu performansı için)
+     * - @Column unique=true kaldırıldı (tekrar önlendi, @Table uniqueConstraint yeterli)
+     */
+    @Column(name = "email", nullable = false, length = 150, columnDefinition = "VARCHAR(150) NOT NULL")
     private String email;
 
-    // Kayıt oluşturulma tarihi (nullable - mevcut kayıtlar için null olabilir)
-    @Column(name = "created_at", nullable = true, updatable = false)
-    private LocalDateTime createdAt;
-
-    // Son güncelleme tarihi (nullable - mevcut kayıtlar için null olabilir)
-    @Column(name = "updated_at", nullable = true)
-    private LocalDateTime updatedAt;
-
-    // Entity kaydedilmeden önce tarihleri otomatik ayarla
-    @PrePersist
-    protected void onCreate() {
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
-        }
-        if (updatedAt == null) {
-            updatedAt = LocalDateTime.now();
-        }
-    }
-
-    // Entity güncellenmeden önce updatedAt'i güncelle
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-        // Eğer createdAt null ise (eski kayıtlar için), şimdiki zamanı ata
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
-        }
-    }
+    // Not: id, createdAt, updatedAt alanları BaseEntity<Long> sınıfından miras alınır
+    // Bu alanlar otomatik olarak mevcuttur ve BaseEntity'deki @PrePersist ve @PreUpdate
+    // metodları tarafından otomatik yönetilir.
 }
