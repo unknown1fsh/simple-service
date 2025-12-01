@@ -8,6 +8,15 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+//TODO: UserRepository - Kullanıcı Repository Interface
+// Bu interface, User entity'si için veritabanı işlemlerini tanımlar.
+// BaseRepository<User, Long>'dan extend edilerek temel CRUD metodları otomatik gelir.
+// Spring Data JPA'nın Query Method Naming Convention'ı kullanılarak otomatik SQL sorguları oluşturulur.
+// Örnek: findByEmail(String email) metodu → SELECT * FROM app_user WHERE email = ?
+// @Repository anotasyonu ile Spring tarafından otomatik bean olarak tanımlanır.
+// Interface implementation: Spring Data JPA runtime'da bu interface için proxy sınıf oluşturur.
+// Polymorphism (Çok biçimlilik): BaseRepository tipinde referans ile UserRepository kullanılabilir.
+
 /**
  * User Repository Interface
  * 

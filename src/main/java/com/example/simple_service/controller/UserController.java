@@ -9,6 +9,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+//TODO: UserController - REST API Controller Sınıfı
+// Bu sınıf, User entity'si için REST API endpoint'lerini tanımlar.
+// @RestController anotasyonu ile bu sınıfın bir REST controller olduğu belirtilir (@Controller + @ResponseBody).
+// @RequestMapping anotasyonu ile base URL path tanımlanır (/users).
+// REST API standartları: HTTP metodları (GET, POST, PUT, DELETE) ve durum kodları (200, 201, 404, 204) kullanılır.
+// Dependency Injection: Constructor injection ile UserService enjekte edilir (best practice).
+// Layered Architecture: Controller katmanı Service katmanına erişir, Repository'ye doğrudan erişmez.
+// HTTP Status Codes: 200 OK (başarılı), 201 CREATED (yeni kaynak), 404 NOT FOUND (bulunamadı), 204 NO CONTENT (silindi).
+// @CrossOrigin anotasyonu ile CORS (Cross-Origin Resource Sharing) ayarları yapılır.
+
 /**
  * User REST Controller
  * 

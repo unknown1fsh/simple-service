@@ -4,6 +4,16 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+//TODO: GlobalExceptionHandler - Global Exception Handler Sınıfı
+// Bu sınıf, tüm controller'larda oluşan exception'ları yakalar ve merkezi bir şekilde yönetir.
+// @ControllerAdvice anotasyonu ile bu sınıfın tüm controller'lar için global exception handler olduğu belirtilir.
+// Exception Handling (Hata Yönetimi): Merkezi exception yönetimi sağlar, kod tekrarını önler (DRY principle).
+// @ExceptionHandler anotasyonu ile spesifik exception tipleri için handler metodları tanımlanır.
+// Try-Catch-Finally: Exception handling Java'da try-catch blokları ile yapılır, burada merkezi yönetim sağlanır.
+// Error Handling Stratejisi: Spesifik exception'lar için özel handler'lar, genel exception'lar için fallback handler.
+// RedirectAttributes: Flash attribute'lar ile kullanıcıya hata mesajları gösterilir.
+// Best Practice: Production'da loglama ve hata tracking sistemi entegrasyonu yapılmalıdır.
+
 /**
  * Global Exception Handler
  * 

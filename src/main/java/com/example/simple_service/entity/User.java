@@ -8,6 +8,15 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+//TODO: User - Kullanıcı Entity Sınıfı
+// Bu sınıf, kullanıcı bilgilerini temsil eden JPA entity'sidir.
+// BaseEntity<Long>'dan extend edilerek id, createdAt, updatedAt alanları otomatik gelir.
+// @Entity anotasyonu ile bu sınıfın bir JPA entity olduğu belirtilir.
+// @Table anotasyonu ile veritabanı tablo yapılandırması yapılır (tablo adı, unique constraint'ler, index'ler).
+// Lombok anotasyonları (@Data, @Builder, @NoArgsConstructor, @AllArgsConstructor) ile boilerplate kod azaltılır.
+// Inheritance (Kalıtım) örneği: BaseEntity'den extend edilerek ortak özellikler miras alınır.
+// Encapsulation (Kapsülleme): Private alanlar ve public getter/setter metodları ile veri kapsülleme sağlanır.
+
 /**
  * User Entity Sınıfı
  * 

@@ -6,6 +6,14 @@ import org.springframework.data.repository.NoRepositoryBean;
 
 import java.io.Serializable;
 
+//TODO: BaseRepository - Generic Base Repository Interface
+// Bu interface, tüm repository sınıfları için ortak CRUD işlemlerini tanımlayan generic bir base interface'dir.
+// Generic programlama (Generics) ile farklı entity ve ID tipleri desteklenir.
+// Spring Data JPA'nın JpaRepository'sinden extend edilerek temel CRUD metodları otomatik sağlanır.
+// @NoRepositoryBean anotasyonu ile bu interface'in kendisi bir repository bean'i olmadığı belirtilir.
+// Interface kavramı: Java'da interface'ler sözleşme (contract) tanımlar, implementasyon alt sınıflarda yapılır.
+// Spring Data JPA, metod isimlerine göre otomatik SQL sorguları oluşturur (Query Method Naming Convention).
+
 /**
  * Base Repository Interface
  * 

@@ -11,6 +11,16 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+//TODO: UserServiceImpl - Kullanıcı Service Implementation
+// Bu sınıf, UserService interface'inin implementasyonudur.
+// BaseServiceImpl<User, Long, UserRepository>'den extend edilerek temel CRUD metodları otomatik gelir.
+// @Service anotasyonu ile Spring tarafından otomatik bean olarak tanımlanır ve dependency injection'a dahil edilir.
+// Inheritance (Kalıtım): BaseServiceImpl'den extend edilerek ortak metodlar miras alınır.
+// Override kavramı: Base metodlar override edilerek User'a özel validasyon ve iş mantığı eklenir.
+// Dependency Injection: Constructor injection ile UserRepository enjekte edilir (best practice).
+// Validation (Doğrulama): Email format kontrolü, duplicate kontrolü gibi iş kuralları burada uygulanır.
+// Regular Expression (Regex): Email format kontrolü için Pattern sınıfı kullanılır.
+
 /**
  * User Service Implementation
  * 
@@ -194,6 +204,9 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long, UserRepository>
      */
     @Override
     public Page<User> findAll(Pageable pageable) {
+        if (pageable == null) {
+            throw new IllegalArgumentException("Pageable boş olamaz!");
+        }
         return repository.findAll(pageable);
     }
     

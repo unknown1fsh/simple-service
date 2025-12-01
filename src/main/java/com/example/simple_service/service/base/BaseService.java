@@ -6,6 +6,14 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
+//TODO: BaseService - Generic Base Service Interface
+// Bu interface, tüm service sınıfları için ortak iş mantığı metodlarını tanımlayan generic bir base interface'dir.
+// Generic programlama (Generics) ile farklı entity ve ID tipleri desteklenir.
+// Service katmanı, Controller ve Repository katmanları arasında köprü görevi görür (Layered Architecture).
+// Interface kavramı: Java'da interface'ler sözleşme (contract) tanımlar, implementasyon alt sınıflarda yapılır.
+// CRUD işlemleri (Create, Read, Update, Delete) bu interface'de tanımlanır.
+// Separation of Concerns (Sorumlulukların Ayrılması): Her katman kendi sorumluluğuna odaklanır.
+
 /**
  * Base Service Interface
  * 

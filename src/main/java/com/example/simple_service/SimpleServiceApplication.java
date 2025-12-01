@@ -3,6 +3,16 @@ package com.example.simple_service;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+//TODO: SimpleServiceApplication - Spring Boot Ana Sınıfı
+// Bu sınıf, Spring Boot uygulamasının başlangıç noktasıdır.
+// @SpringBootApplication anotasyonu ile Spring Boot'un otomatik yapılandırması etkinleştirilir.
+// Bu anotasyon şunları içerir:
+// - @Configuration: Bu sınıf bir Spring yapılandırma sınıfıdır
+// - @EnableAutoConfiguration: Spring Boot'un otomatik yapılandırmasını etkinleştirir
+// - @ComponentScan: Belirtilen paket ve alt paketlerdeki component'leri tarar
+// main() metodu uygulamanın giriş noktasıdır ve SpringApplication.run() ile uygulama başlatılır.
+// Java'da her uygulama bir main() metoduna sahip olmalıdır (public static void main(String[] args))
+
 /**
  * Simple Service Application - Ana Sınıf
  * 

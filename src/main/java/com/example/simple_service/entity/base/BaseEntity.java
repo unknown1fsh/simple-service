@@ -6,6 +6,14 @@ import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+//TODO: BaseEntity - Generic Base Entity Sınıfı
+// Bu sınıf, tüm entity sınıflarının ortak özelliklerini içeren generic bir base sınıftır.
+// Generic programlama (Generics) kullanılarak farklı ID tipleri (Long, String, UUID vb.) desteklenir.
+// @MappedSuperclass anotasyonu ile bu sınıfın kendisi bir entity olmadığı, sadece diğer entity'ler için base olduğu belirtilir.
+// JPA Lifecycle Callback'leri (@PrePersist, @PreUpdate) ile otomatik timestamp yönetimi yapılır.
+// Inheritance (Kalıtım) kavramı: Tüm entity'ler bu sınıftan extend ederek ortak özellikleri miras alır.
+// Bu yaklaşım DRY (Don't Repeat Yourself) prensibine uygundur.
+
 /**
  * Base Entity Sınıfı
  * 
@@ -57,7 +65,7 @@ public abstract class BaseEntity<ID extends Serializable> {
      * Not: Index tanımları alt sınıflarda (User entity gibi) @Table indexes ile yapılmalıdır.
      * BaseEntity @MappedSuperclass olduğu için @Table kullanamaz.
      */
-    @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME(6)")
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     /**
@@ -71,7 +79,7 @@ public abstract class BaseEntity<ID extends Serializable> {
      * 
      * Not: Index tanımları alt sınıflarda (User entity gibi) @Table indexes ile yapılmalıdır.
      */
-    @Column(name = "updated_at", nullable = false, columnDefinition = "DATETIME(6)")
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
     /**

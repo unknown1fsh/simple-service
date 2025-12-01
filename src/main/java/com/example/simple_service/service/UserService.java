@@ -7,6 +7,15 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 
+//TODO: UserService - Kullanıcı Service Interface
+// Bu interface, User entity'si için iş mantığı (business logic) metodlarını tanımlar.
+// BaseService<User, Long>'dan extend edilerek temel CRUD metodları otomatik gelir.
+// Interface kavramı: Java'da interface'ler sözleşme (contract) tanımlar, implementasyon UserServiceImpl'de yapılır.
+// Service katmanının görevleri: İş kurallarını uygular, validasyon yapar, transaction yönetimi sağlar.
+// Separation of Concerns (Sorumlulukların Ayrılması): Controller repository'ye doğrudan erişmez, service üzerinden erişir.
+// Polymorphism (Çok biçimlilik): BaseService tipinde referans ile UserService kullanılabilir.
+// User'a özel metodlar (getUserByEmail, findByNameContainingIgnoreCase) burada tanımlanır.
+
 /**
  * User Service Interface
  * 

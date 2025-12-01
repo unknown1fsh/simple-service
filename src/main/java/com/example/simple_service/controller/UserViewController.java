@@ -14,6 +14,16 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 import java.util.Optional;
 
+//TODO: UserViewController - Thymeleaf View Controller Sınıfı
+// Bu sınıf, User entity'si için Thymeleaf template'leri ile web sayfalarını yönetir.
+// @Controller anotasyonu ile bu sınıfın bir Spring MVC controller olduğu belirtilir (REST controller'dan farklı olarak view döndürür).
+// Thymeleaf Template Engine: Server-side rendering yapar, HTML template'leri render eder, Model verilerini template'lere aktarır.
+// Dependency Injection: Constructor injection ile UserService enjekte edilir (best practice).
+// Model ve View: Model sınıfı ile veriler template'lere aktarılır, String dönen metodlar template adını belirtir.
+// Pagination (Sayfalama): Page ve Pageable kullanılarak büyük veri setleri sayfalanır.
+// RedirectAttributes: Flash attribute'lar ile redirect sonrası mesajlar gösterilir.
+// Layered Architecture: Controller katmanı Service katmanına erişir, Repository'ye doğrudan erişmez.
+
 /**
  * User View Controller
  * 

@@ -8,6 +8,15 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
+//TODO: BaseServiceImpl - Generic Base Service Implementation
+// Bu sınıf, BaseService interface'inin generic implementasyonudur.
+// Abstract class kavramı: Bu sınıf abstract olarak tanımlanmıştır, doğrudan kullanılmaz, sadece alt sınıflar için base görevi görür.
+// Generic programlama (Generics) ile farklı entity, ID ve Repository tipleri desteklenir.
+// @Transactional anotasyonu ile transaction yönetimi sağlanır (ACID özellikleri: Atomicity, Consistency, Isolation, Durability).
+// Template Method Pattern: Base metodlar tanımlanır, alt sınıflar override ederek özelleştirebilir.
+// Dependency Injection: Constructor injection ile repository enjekte edilir (best practice).
+// Inheritance (Kalıtım) ve Polymorphism (Çok biçimlilik) kavramları burada uygulanır.
+
 /**
  * Base Service Implementation
  * 
@@ -71,6 +80,9 @@ public abstract class BaseServiceImpl<T extends BaseEntity<ID>,
     public T save(T entity) {
         // Alt sınıflar validate metodunu override ederek özel validasyon ekleyebilir
         validateBeforeSave(entity);
+        if (entity == null) {
+            throw new IllegalArgumentException("Entity boş olamaz!");
+        }
         return repository.save(entity);
     }
 
@@ -94,6 +106,9 @@ public abstract class BaseServiceImpl<T extends BaseEntity<ID>,
     @Override
     @Transactional(readOnly = true)
     public T findById(ID id) {
+        if (id == null) {
+            return null;
+        }
         return repository.findById(id).orElse(null);
     }
 
@@ -106,6 +121,9 @@ public abstract class BaseServiceImpl<T extends BaseEntity<ID>,
     @Override
     @Transactional(readOnly = true)
     public Optional<T> findByIdOptional(ID id) {
+        if (id == null) {
+            return Optional.empty();
+        }
         return repository.findById(id);
     }
 
@@ -144,6 +162,9 @@ public abstract class BaseServiceImpl<T extends BaseEntity<ID>,
     @Override
     @Transactional
     public boolean delete(ID id) {
+        if (id == null) {
+            return false;
+        }
         if (existsById(id)) {
             repository.deleteById(id);
             return true;
@@ -160,6 +181,9 @@ public abstract class BaseServiceImpl<T extends BaseEntity<ID>,
     @Override
     @Transactional(readOnly = true)
     public boolean existsById(ID id) {
+        if (id == null) {
+            return false;
+        }
         return repository.existsById(id);
     }
 
